@@ -1,0 +1,156 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+
+### 2-01
+PUT http://localhost:9200/movie/_doc/1
+Content-Type: application/json
+
+{
+  "movieCd": "1",
+  "movieNm": "살아남은 아이",
+  "movieNmEN": "Last Child",
+  "prdYear": "2019",
+  "openDt": "",
+  "typeNm": "장편",
+  "prdStatNm": "기타"
+}
+
+### 2-02
+GET http://localhost:9200/movie
+
+
+### p.42 참고
+# 노드 설정 방법
+PUT http://localhost:9200/_cluster/settings
+Content-Type: application/json
+
+{
+  "persistent": {
+    "action.auto_create_index": "false"
+  }
+}
+
+### p.42 참고
+# 노드 설정 내용 조회
+GET http://localhost:9200/_cluster/settings
+
+
+### 인덱스 생성
+# https://www.elastic.co/guide/en/elasticsearch/reference/6.7/removal-of-types.html
+# elasticsearch 6.7부터 mappings._doc 삭제
+PUT http://localhost:9200/movie
+Content-Type: application/json
+
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "movieCd": {"type": "integer"},
+      "movieNm": {"type": "text"},
+      "movieNmEN": {"type": "text"},
+      "prdYear": {"type": "integer"},
+      "openDt": {"type": "date"},
+      "typeNm": {"type": "keyword"},
+      "prdStatNm": {"type": "keyword"},
+      "genreAlt": {"type":  "keyword"}
+    }
+  }
+}
+
+### 인덱스 조회
+GET http://localhost:9200/movie
+
+### 인덱스 삭제
+DELETE http://localhost:9200/movie
+
+
+### 문서 생성
+POST http://localhost:9200/movie/_doc/1
+Content-Type: application/json
+
+{
+  "movieCd": "1",
+  "movieNm": "살아남은 아이",
+  "movieNmEN": "Last Child",
+  "prdYear": "2019",
+  "openDt": "2019-04-24",
+  "typeNm": "장편",
+  "prdStatNm": "기타",
+  "genreAlt": "드라마,가족"
+}
+
+### 문서 조회
+GET http://localhost:9200/movie/_doc/1
+
+### 문서 삭제
+DELETE http://localhost:9200/movie/_doc/1
+
+
+### ID를 지정하지 않고 문서 생성
+POST http://localhost:9200/movie/_doc
+Content-Type: application/json
+
+{
+  "movieCd": "2",
+  "movieNm": "살아남은 아이2",
+  "movieNmEN": "Last Child2",
+  "prdYear": "2019",
+  "openDt": "2019-04-24",
+  "typeNm": "장편",
+  "prdStatNm": "기타",
+  "genreAlt": "드라마,가족,유아"
+}
+
+### 문서 전체
+GET http://localhost:9200/movie/_search
+
+### 모든 필드로 검색
+GET http://localhost:9200/movie/_search?q=기타
+
+### 특정 필드로 검색
+GET http://localhost:9200/movie/_search?q=genreAlt:드라마,가족
+
+
+### 'genreAlt' 필드로 데이터 집계
+POST http://localhost:9200/movie/_search?size=0
+Content-Type: application/json
+
+{
+  "aggs": {
+    "genre": {
+      "terms": {
+        "field": "genreAlt"
+      }
+    }
+  }
+}
+
+### 중첩 집계
+POST http://localhost:9200/movie/_search?size=0
+Content-Type: application/json
+
+{
+  "aggs": {
+    "type": {
+      "terms": {
+        "field": "typeNm"
+      },
+      "aggs": {
+        "genre": {
+          "terms": {
+            "field": "genreAlt"
+          }
+        }
+      }
+    }
+  }
+}
+
+###
