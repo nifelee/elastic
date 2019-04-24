@@ -1,0 +1,38 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+
+### p.17
+PUT http://localhost:9200/_snapshot/javacafe
+Content-Type: application/json
+
+{
+  "type": "fs",
+  "settings": {
+    "location": "/REPO/search_example",
+    "compress": true
+  }
+}
+
+### p.18
+GET http://127.0.0.1:9200/_snapshot/javacafe/_all
+
+### p.18
+PUT http://localhost:9200/_snapshot/apache-web-log
+Content-Type: application/json
+
+{
+  "type": "fs",
+  "settings": {
+    "location": "/REPO/agg_example",
+    "compress": true
+  }
+}
+
+### p.19
+GET http://127.0.0.1:9200/_snapshot/apache-web-log/_all
+
+###
