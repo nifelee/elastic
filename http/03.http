@@ -1,0 +1,295 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+### 인덱스 생성
+PUT http://localhost:9200/movie_search
+Content-Type: application/json
+
+{
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "movieCd": {
+        "type": "keyword"
+      },
+      "movieNm": {
+        "type": "text",
+        "analyzer": "standard"
+      },
+      "movieNmEn": {
+        "type": "text",
+        "analyzer": "standard"
+      },
+      "prdtYear": {
+        "type": "integer"
+      },
+      "openDt": {
+        "type": "integer"
+      },
+      "typeNm": {
+        "type": "keyword"
+      },
+      "prdtStatNm": {
+        "type": "keyword"
+      },
+      "nationAlt": {
+        "type": "keyword"
+      },
+      "genreAlt": {
+        "type": "keyword"
+      },
+      "repNationNm": {
+        "type": "keyword"
+      },
+      "repGenreNm": {
+        "type": "keyword"
+      },
+      "companies": {
+        "properties": {
+          "companyCd": {
+            "type": "keyword"
+          },
+          "companyNm": {
+            "type": "keyword"
+          }
+        }
+      },
+      "directors": {
+        "properties": {
+          "peopleNm": {
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  }
+}
+
+###
+GET http://localhost:9200/movie_search/_mapping
+
+###
+POST http://localhost:9200/movie_search/_search
+Content-Type: application/json
+
+{
+ "size":0,
+  "aggs": {
+    "indices": {
+      "terms": {
+        "field": "_index",
+        "size": 10
+      }
+    }
+  }
+}
+
+
+### 3.2.7 _rouging 메타 필드
+PUT http://localhost:9200/movie_routing
+Content-Type: application/json
+
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "_routing": {
+      "required": true
+    },
+    "properties": {
+      "repGenreNm": {
+        "type": "keyword"
+      },
+      "movieNm": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+###
+PUT http://localhost:9200/movie_routing/_doc/1?routing=ko
+Content-Type: application/json
+
+{
+  "repGenreNm": "한국어",
+  "movieNm": "살아남은 아이"
+}
+
+###
+PUT http://localhost:9200/movie_routing/_doc/2?routing=jp
+Content-Type: application/json
+
+{
+   "repGenreNm": "일본어",
+   "movieNm": "공각기동대"
+}
+
+### routing 검색 안됨!
+# 전체 문서가 검색되어 아래 방식으로 검색
+POST http://localhost:9200/movie_routing/_search?routing=ko
+Content-Type: application/json
+
+{}
+
+### routing 검색 (GET/POST 둘 다 가능)
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-routing-field.html
+# kibana 에서는 전체 검색되어 짐
+POST http://localhost:9200/movie_routing/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "terms": {
+      "_routing": [ "ko" ]
+    }
+  }
+}
+
+### kibana에서도 검색 가능
+POST http://localhost:9200/movie_routing/_search?q=_routing:jp
+
+
+### Custom 분석기 등록
+PUT http://localhost:9200/movie_analyzer
+Content-Type: application/json
+
+{
+   "settings":{
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+      },
+      "analysis":{
+         "analyzer":{
+            "custom_movie_analyzer":{
+               "type":"custom",
+               "char_filter": [
+                 "html_strip"
+               ],
+               "tokenizer":"standard",
+               "filter":[
+                  "lowercase"
+               ]
+            }
+         }
+      }
+   }
+}
+
+### Custom 분석기를 이용한 분석
+POST http://localhost:9200/movie_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "analyzer" : "custom_movie_analyzer",
+  "text" : "<b>Elasticsearch</b> is cool"
+}
+
+###
+DELETE http://localhsot:9200/movie_analyzer
+
+
+### 색인과 검색 시 분석기를 각각 설정
+PUT http://localhost:9200/movie_analyzer
+Content-Type: application/json
+
+{
+   "settings":{
+      "index": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0
+      },
+      "analysis": {
+         "analyzer": {
+            "movie_lower_test_analyzer": {
+               "type":"custom",
+               "tokenizer":"standard",
+               "filter": [
+                  "lowercase"
+               ]
+            },
+            "movie_stop_test_analyzer": {
+               "type":"custom",
+               "tokenizer":"standard",
+               "filter":[
+                  "lowercase",
+                  "english_stop"
+               ]
+            }
+         },
+         "filter":{
+            "english_stop":{
+               "type":"stop",
+               "stopwords":"_english_"
+            }
+         }
+      }
+   },
+   "mappings": {
+     "properties": {
+       "title": {
+         "type": "text",
+         "analyzer": "movie_stop_test_analyzer",
+         "search_analyzer": "movie_lower_test_analyzer"
+       }
+     }
+   }
+}
+
+###
+PUT http://localhost:9200/movie_analyzer/_doc/1
+Content-Type: application/json
+
+{
+  "title": "Harry Potter and the Chamber of Secrets"
+}
+
+### test
+#POST /movie_analyzer/_analyze
+#{
+#  "analyzer" : "movie_lower_test_analyzer",
+#  "text" : "Harry Potter and the Chamber of Secrets"
+#}
+#
+#POST /movie_analyzer/_analyze
+#{
+#  "analyzer" : "movie_stop_test_analyzer",
+#  "text" : "Harry Potter and the Chamber of Secrets"
+#}
+
+### 검색 안됨 ([chamber], [of], [secrets] 으로 검색)
+POST http://localhost:9200/movie_analyzer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "query_string": {
+      "default_operator": "AND",
+      "query": "Chamber of Secrets"
+    }
+  }
+}
+
+### 검색
+POST http://localhost:9200/movie_analyzer/_search
+Content-Type: application/json
+
+{
+  "query": {
+    "query_string": {
+      "default_operator": "AND",
+      "query": "Chamber secrets"
+    }
+  }
+}
+
+###
