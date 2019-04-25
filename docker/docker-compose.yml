@@ -1,6 +1,7 @@
 version: '2'
 services:
   elasticsearch:
+    container_name: elasticsearch
     image: elastic:0.1
     ports:
       - 9200:9200
@@ -13,6 +14,7 @@ services:
       - "discovery.type=single-node"
 
   kibana:
+    container_name: kibana
     image: kibana:7.0.0
     ports:
       - 5601:5601
