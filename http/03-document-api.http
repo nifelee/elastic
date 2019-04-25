@@ -1,0 +1,94 @@
+# _source_exclude 동작 안됨
+GET http://localhost:9200/movie_dynamic/_doc/1?_source_exclude=movieNm
+
+### `_source_exclude` 뒤에 `s` 붙음
+# https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-get.html
+GET http://localhost:9200/movie_dynamic/_doc/1?_source_excludes=movieNm
+
+###
+PUT http://localhost:9200/movie_dynamic/_doc/2
+Content-Type: application/json
+
+{
+  "movieCd": "20190401",
+  "movieNm": "살아남은 아이 (2019)",
+  "movieNmEn": "Last Child (2019)"
+}
+
+###
+GET http://localhost:9200/movie_dynamic/_doc/2
+
+## Delete By Query API
+POST http://localhost:9200/movie_dynamic/_delete_by_query
+Content-Type: application/json
+
+{
+  "query": {
+    "term": {
+      "movieCd": "20190401"
+    }
+  }
+}
+
+
+###
+PUT http://localhost:9200/movie_dynamic/_doc/1
+Content-Type: application/json
+
+{
+    "counter" : 1000,
+    "movieNmEn" : "Last Child"
+}
+
+### URL 형식 변경 (use the endpoint /{index}/_update/{id} instead)
+#POST movie_dynamic/_doc/1/_update
+POST http://localhost:9200/movie_dynamic/_update/1
+Content-Type: application/json
+
+{
+    "script" : {
+        "source": "ctx._source.counter += params.count",
+        "lang": "painless",
+        "params" : {
+            "count" : 1
+        }
+    }
+}
+
+###
+GET http://localhost:9200/movie_dynamic/_doc/1
+
+
+
+### Bulk API는 IntelliJ IDEA에서 안됨 (ndjson 지원이 http에서 안되는 듯, \n 인식을 못함)
+# kibana에서 실행
+POST http://localhost:9200/_bulk
+Content-Type: application/x-ndjson
+
+{ "index" : { "_index" : "movie_dynamic", "_type" : "_doc", "_id" : "1" } }
+{ "title" : "살아남은 아이" }
+{ "delete" : { "_index" : "movie_dynamic", "_type" : "_doc", "_id" : "2" } }
+{ "create" : { "_index" : "movie_dynamic", "_type" : "_doc", "_id" : "3" } }
+{ "title" : "프렌즈: 몬스터섬의비밀" }
+{ "update" : {"_index" : "movie_dynamic", "_type" : "_doc", "_id" : "1"} }
+{ "doc" : {"movieNmEn" : "Last Child"} }
+
+
+###
+POST http://localhost:9200/_reindex
+Content-Type: application/json
+
+{
+  "source": {
+    "index": "movie_dynamic"
+  },
+  "dest": {
+    "index": "movie_dynamic_new",
+    "version_type": "internal"
+  }
+}
+
+###
+GET http://localhost:9200/movie_dynamic_new/_search
+
+###
