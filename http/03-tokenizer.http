@@ -1,0 +1,106 @@
+# For a quick start check out our HTTP Requests collection (Tools|HTTP Client|Open HTTP Requests Collection).
+#
+# Following HTTP Request Live Templates are available:
+# * 'gtrp' and 'gtr' create a GET request with or without query parameters;
+# * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
+# * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
+PUT http://localhost:9200/movie_ngram_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "ngram_analyzer": {
+          "tokenizer": "ngram_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 3,
+          "max_gram": 3,
+          "token_chars": [
+            "letter"
+          ]
+        }
+      }
+    }
+  }
+}
+
+###
+POST http://localhost:9200/movie_ngram_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "tokenizer": "ngram_tokenizer",
+  "text": "Harry Potter and the Chamber of Secrets"
+}
+
+###
+DELETE http://localhost:9200/movie_ngram_analyzer
+
+###
+PUT http://localhost:9200/movie_ngram_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "ngram_analyzer": {
+          "tokenizer": "ngram_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 5,
+          "max_gram": 5,
+          "token_chars": [
+            "letter"
+          ]
+        }
+      }
+    }
+  }
+}
+
+
+### Edge Ngram 토크나이저
+PUT http://localhost:9200/movie_engram_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "edge_ngram_analyzer": {
+          "tokenizer": "edge_ngram_tokenizer"
+        }
+      },
+      "tokenizer": {
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 3,
+          "max_gram": 10,
+          "token_chars": [
+            "letter"
+          ]
+        }
+      }
+    }
+  }
+}
+
+###
+POST http://localhost:9200/movie_engram_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "tokenizer": "edge_ngram_tokenizer",
+  "text": "Harry Potter and the Chamber of Secrets"
+}
+
+###
