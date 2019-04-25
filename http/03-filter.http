@@ -1,0 +1,155 @@
+# filter에 `standard`가 없어야 동작함
+
+### Ascii Folding 토큰 필터
+PUT http://localhost:9200/movie_af_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "asciifolding_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  }
+}
+
+###
+POST http://localhost:9200/movie_af_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "asciifolding_analyzer",
+  "text": "hello javacáfe"
+}
+
+
+###
+PUT http://localhost:9200/movie_stem_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "stemmer_eng_analyzer": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "stemmer_eng_filter"
+          ]
+        }
+      },
+      "filter": {
+        "stemmer_eng_filter": {
+          "type": "stemmer",
+          "name": "english"
+        }
+      }
+    }
+  }
+}
+
+###
+POST http://localhost:9200/movie_stem_analyzer/_analyze
+Content-Type: application/json
+
+{
+   "analyzer": "stemmer_eng_analyzer",
+   "text": "Harry Potter and the Chamber of Secrets"
+}
+
+###
+DELETE http://localhost:9200/movie_syno_analyzer
+
+###
+PUT http://localhost:9200/movie_syno_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "synonym_analyzer": {
+          "tokenizer": "whitespace",
+          "filter": [
+            "synonym_filter"
+          ]
+        }
+      },
+      "filter": {
+        "synonym_filter": {
+          "type": "synonym",
+          "synonyms": [
+            "Harry => 해리"
+          ]
+        }
+      }
+    }
+  }
+}
+
+###
+POST http://localhost:9200/movie_syno_analyzer/_analyze
+Content-Type: application/json
+
+{
+   "analyzer": "synonym_analyzer",
+   "text": "Harry Potter and the Chamber of Secrets"
+}
+
+
+### 동의어 사전 등록
+# p.127 [참고] filter에 `lowercase` 적용 안하면 안됨
+PUT http://localhost:9200/movie_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "index": {
+      "analysis": {
+        "analyzer": {
+          "synonym_analyzer": {
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "synonym_filter"
+            ]
+          }
+        },
+        "filter": {
+          "synonym_filter": {
+            "type": "synonym",
+            "ignore_case": true,
+            "synonyms_path": "analysis/synonym.txt"
+          }
+        }
+      }
+    }
+  }
+}
+
+###
+POST http://localhost:9200/movie_analyzer/_analyze
+Content-Type: application/json
+
+{
+   "analyzer": "synonym_analyzer",
+   "text": "Elasticsearch Harry Potter"
+}
+
+###
+DELETE http://localhost:9200/movie_analyzer
+
+### 인덱스 Reload (_close 후 _open)
+POST http://localhost:9200/movie_analyzer/_close
+
+###
+POST http://localhost:9200/movie_analyzer/_open
+
+###

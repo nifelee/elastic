@@ -7,6 +7,7 @@ services:
       - 9300:9300
     volumes:
       - /Users/hklee/workspace/elastic/docker/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - /Users/hklee/workspace/elastic/docker/config/analysis:/usr/share/elasticsearch/config/analysis
       - /Users/hklee/workspace/elastic/repo:/REPO
     environment:
       - "discovery.type=single-node"
