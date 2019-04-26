@@ -22,6 +22,9 @@ Content-Type: application/json
 ### 2-02
 GET http://localhost:9200/movie
 
+###
+DELETE http://localhost:9200/movie
+
 
 ### p.42 참고
 # 노드 설정 방법
@@ -138,12 +141,12 @@ Content-Type: application/json
 
 {
   "aggs": {
-    "type": {
+    "aggs-typeNm": {
       "terms": {
         "field": "typeNm"
       },
       "aggs": {
-        "genre": {
+        "aggs-genreAlt": {
           "terms": {
             "field": "genreAlt"
           }
