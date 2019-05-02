@@ -60,8 +60,8 @@ POST http://localhost:9200/movie_stem_analyzer/_analyze
 Content-Type: application/json
 
 {
-   "analyzer": "stemmer_eng_analyzer",
-   "text": "Harry Potter and the Chamber of Secrets"
+  "analyzer": "stemmer_eng_analyzer",
+  "text": "Harry Potter and the Chamber of Secrets"
 }
 
 ###
@@ -99,8 +99,8 @@ POST http://localhost:9200/movie_syno_analyzer/_analyze
 Content-Type: application/json
 
 {
-   "analyzer": "synonym_analyzer",
-   "text": "Harry Potter and the Chamber of Secrets"
+  "analyzer": "synonym_analyzer",
+  "text": "Harry Potter and the Chamber of Secrets"
 }
 
 
@@ -139,8 +139,8 @@ POST http://localhost:9200/movie_analyzer/_analyze
 Content-Type: application/json
 
 {
-   "analyzer": "synonym_analyzer",
-   "text": "Elasticsearch Harry Potter"
+  "analyzer": "synonym_analyzer",
+  "text": "Elasticsearch Harry Potter"
 }
 
 ###

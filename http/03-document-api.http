@@ -36,8 +36,8 @@ PUT http://localhost:9200/movie_dynamic/_doc/1
 Content-Type: application/json
 
 {
-    "counter" : 1000,
-    "movieNmEn" : "Last Child"
+  "counter": 1000,
+  "movieNmEn": "Last Child"
 }
 
 ### URL 형식 변경 (use the endpoint /{index}/_update/{id} instead)
@@ -46,13 +46,13 @@ POST http://localhost:9200/movie_dynamic/_update/1
 Content-Type: application/json
 
 {
-    "script" : {
-        "source": "ctx._source.counter += params.count",
-        "lang": "painless",
-        "params" : {
-            "count" : 1
-        }
+  "script": {
+    "source": "ctx._source.counter += params.count",
+    "lang": "painless",
+    "params": {
+      "count": 1
     }
+  }
 }
 
 ###

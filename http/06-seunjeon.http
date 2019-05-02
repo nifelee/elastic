@@ -19,7 +19,11 @@ Content-Type: application/json
             "type": "seunjeon_tokenizer",
             "index_eojeol": false,
             "user_words": [
-              "낄끼+빠빠,-100", "c\\+\\+", "어그로", "버카충", "abc마트"
+              "낄끼+빠빠,-100",
+              "c\\+\\+",
+              "어그로",
+              "버카충",
+              "abc마트"
             ]
           }
         }
@@ -82,8 +86,8 @@ POST http://localhost:9200/seunjeon_with_dic_analyzer/_analyze
 Content-Type: application/json
 
 {
-"analyzer": "korean",
-"text": "잠실역"
+  "analyzer": "korean",
+  "text": "잠실역"
 }
 
 ### 검색
