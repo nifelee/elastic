@@ -1,0 +1,227 @@
+# Nori 등록
+PUT http://localhost:9200/nori_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "index": {
+      "analysis": {
+        "tokenizer": {
+          "nori_user_dict_tokenizer": {
+            "type": "nori_tokenizer",
+            "decompound_mode": "mixed",
+            "user_dictionary": "dic/nori_user_dic.txt"
+          }
+        },
+        "analyzer": {
+          "nori_token_analyzer": {
+            "type": "custom",
+            "tokenizer": "nori_user_dict_tokenizer"
+          }
+        }
+      }
+    }
+  }
+}
+
+### 검색
+# `decompound_mode=mixed`
+POST http://localhost:9200/nori_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "nori_token_analyzer",
+  "text": "잠실역"
+}
+
+###
+POST http://localhost:9200/nori_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "nori_token_analyzer",
+  "text": "그대 이름은 장미"
+}
+
+
+
+### nori_part_of_speech 설정
+PUT http://localhost:9200/nori_part_of_speech_analyzer
+Content-Type: application/json
+
+{
+  "settings": {
+    "index": {
+    "analysis": {
+      "analyzer": {
+        "nori_stoptags_analyzer": {
+          "tokenizer": "nori_tokenizer",
+          "filter": [
+            "nori_posfilter"
+          ]
+        }
+      },
+      "filter": {
+        "nori_posfilter": {
+          "type": "nori_part_of_speech",
+          "stoptags": [
+            "E",
+            "IC",
+            "J",
+            "MAG",
+            "MAJ",
+            "MM",
+            "NA",
+            "NR",
+            "SC",
+            "SE",
+            "SF",
+            "SH",
+            "SL",
+            "SN",
+            "SP",
+            "SSC",
+            "SSO",
+            "SY",
+            "UNA",
+            "UNKNOWN",
+            "VA",
+            "VCN",
+            "VCP",
+            "VSV",
+            "VV",
+            "VX",
+            "XPN",
+            "XR",
+            "XSA",
+            "XSN",
+            "XSV"
+          ]
+        }
+      }
+    }
+  }
+  }
+}
+
+### 검색
+# `은` 제거
+POST http://localhost:9200/nori_part_of_speech_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "nori_stoptags_analyzer",
+  "text": "그대 이름은 장미"
+}
+
+
+
+### nori_readingform 설정 (한자를 한글로 변환)
+PUT http://localhost:9200/nori_readingform
+Content-Type: application/json
+
+{
+    "settings": {
+        "index":{
+            "analysis":{
+                "analyzer" : {
+                    "nori_readingform_analyzer" : {
+                        "tokenizer" : "nori_tokenizer",
+                        "filter" : ["nori_readingform"]
+                    }
+                }
+            }
+        }
+    }
+}
+
+### 검색
+POST  localhost:9200/nori_readingform/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "nori_readingform_analyzer",
+  "text": "中國"
+}
+
+
+
+### Nori 전체 설정
+PUT http://localhost:9200/nori_full_analyzer
+Content-Type: application/json
+
+{
+  "mappings": {
+    "properties": {
+      "description": {
+        "type": "text",
+        "analyzer": "korean_analyzer"
+      }
+    }
+  },
+  "settings": {
+    "index": {
+      "analysis": {
+        "analyzer": {
+          "korean_analyzer": {
+            "filter": [
+              "pos_filter_speech",
+              "nori_readingform",
+              "lowercase"
+            ],
+            "tokenizer": "nori_tokenizer"
+          }
+        },
+        "filter": {
+          "pos_filter_speech": {
+            "type": "nori_part_of_speech",
+            "stoptags": [
+              "E",
+              "IC",
+              "J",
+              "MAG",
+              "MAJ",
+              "MM",
+              "NA",
+              "NR",
+              "SC",
+              "SE",
+              "SF",
+              "SH",
+              "SL",
+              "SN",
+              "SP",
+              "SSC",
+              "SSO",
+              "SY",
+              "UNA",
+              "UNKNOWN",
+              "VA",
+              "VCN",
+              "VCP",
+              "VSV",
+              "VV",
+              "VX",
+              "XPN",
+              "XR",
+              "XSA",
+              "XSN",
+              "XSV"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+
+###
+POST  localhost:9200/nori_full_analyzer/_analyze
+Content-Type: application/json
+
+{
+  "analyzer": "korean_analyzer",
+  "text": "삼성전자 中國에서 새 휴대폰 발표ㅋㅋ"
+}
+
+###
