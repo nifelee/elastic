@@ -1,0 +1,110 @@
+# 7.3.3.3 한글 초성 검색 적용하기
+### 인덱스 생성
+PUT http://localhost:9200/ac_test3
+Content-Type: application/json
+
+{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 5,
+            "number_of_replicas" : 1
+        },
+		"analysis": {
+			"analyzer": {
+				"chosung_index_analyzer": {
+					"type": "custom",
+					"tokenizer": "keyword",
+					"filter": [
+						"javacafe_chosung_filter",
+						"lowercase",
+						"trim",
+						"edge_ngram_filter_front"
+					]
+				},
+				"chosung_search_analyzer": {
+					"type": "custom",
+					"tokenizer": "keyword",
+					"filter": [
+						"javacafe_chosung_filter",
+						"lowercase",
+						"trim"
+					]
+				}
+			},
+			"tokenizer" : {
+				"edge_ngram_tokenizer" : {
+					"type" : "edgeNGram",
+					"min_gram" : "1",
+					"max_gram" : "50",
+					"token_chars" : [
+						"letter",
+						"digit",
+						"punctuation",
+						"symbol"
+					]
+				}
+			},
+			"filter": {
+				"edge_ngram_filter_front" : {
+					"type" : "edgeNGram",
+					"min_gram" : "1",
+					"max_gram" : "50",
+					"side" : "front"
+				},
+				"javacafe_chosung_filter": {
+					"type": "javacafe_chosung"
+				}
+			}
+		}
+	}
+}
+
+### 매핑 추가
+PUT http://localhost:9200/ac_test3/_mapping/ac_test3
+Content-Type: application/json
+
+{
+	"properties": {
+		"item": {
+			"type": "keyword",
+			"boost": 30
+		},
+		"itemChosung": {
+			"type": "text",
+			"analyzer": "chosung_index_analyzer",
+			"search_analyzer": "chosung_search_analyzer",
+			"boost": 10
+		}
+	}
+}
+
+### Bulk Insert
+POST http://localhost:9200/ac_test3/_bulk
+Content-Type: application/json
+
+{"index" : { "_index" : "ac_test3", "_type" : "ac_test3", "_id" : "1" }}
+{"item" : "신혼", "itemChosung" : "신혼"}
+{"index" : { "_index" : "ac_test3", "_type" : "ac_test3", "_id" : "2" }}
+{"item" : "신혼가전", "itemChosung" : "신혼가전"}
+{"index" : { "_index" : "ac_test3", "_type" : "ac_test3", "_id" : "3" }}
+{"item" : "신혼가전특별전", "itemChosung" : "신혼가전특별전"}
+
+
+### 초성 검색
+POST http://localhost:9200/ac_test3/_search
+Content-Type: application/json
+
+{
+	"query" : {
+		"bool" : {
+			"should" : [{
+				"term" : {
+					"itemChosung" : "ㅅㅎㄱㅈ"
+				}
+			}],
+			"minimum_should_match" : 1
+		}
+	}
+}
+
+###

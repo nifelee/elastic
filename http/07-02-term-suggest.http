@@ -1,0 +1,65 @@
+### 7.2.1 Term Suggester API를 이용한 오타 교정
+# 인덱스 생성
+PUT http://localhost:9200/company_spellchecker
+Content-Type: application/json
+
+{
+  "settings": {
+    "index": {
+      "analysis": {
+        "analyzer": {
+          "korean_spell_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "trim",
+              "lowercase",
+              "javacafe_spell"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+
+### 매핑 설정
+PUT http://localhost:9200/company_spellchecker/_doc/_mappings
+Content-Type: application/json
+
+{
+    "properties": {
+      "name": {
+        "type": "keyword",
+        "copy_to":["suggest"]
+      },
+      "suggest": {
+        "type": "completion",
+        "analyzer": "korean_spell_analyzer"
+      }
+    }
+}
+
+### 샘플 데이터 등록
+PUT http://localhost:9200/company_spellchecker/_doc/1
+Content-Type: application/json
+
+{
+     "name" : "삼성전자"
+}
+
+### 검색
+# OpenJDK에서는 Normalizer.normalize(FCK) 동작 상이
+POST http://localhost:9200/company_spellchecker/_doc/_search
+Content-Type: application/json
+
+{
+	"suggest": {
+		"my-suggestion": {
+			"text": "샴성전자",
+			"term": {
+				"field": "suggest"
+			}
+		}
+	}
+}

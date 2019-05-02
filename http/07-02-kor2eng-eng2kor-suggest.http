@@ -1,0 +1,104 @@
+### 7.2.2 한영/영한 오타 교정
+
+### 인덱스 생성
+PUT http://localhost:9200/search_keyword
+Content-Type: application/json
+
+{
+	"settings": {
+		"index": {
+			"analysis": {
+				"analyzer": {
+					"kor2eng_analyzer": {
+						"type": "custom",
+						"tokenizer": "standard",
+						"filter": [
+							"trim",
+							"lowercase",
+							"javacafe_kor2eng"
+						]
+					},
+					"eng2kor_analyzer": {
+						"type": "custom",
+						"tokenizer": "standard",
+						"filter": [
+							"trim",
+							"lowercase",
+							"javacafe_eng2kor"
+						]
+					}
+				}
+			}
+		}
+	}
+}
+
+### 매핑 설정
+PUT http://localhost:9200/search_keyword/_doc/_mapping
+Content-Type: application/json
+
+{
+	"properties": {
+		"name": {
+			"type": "keyword",
+			"copy_to": ["kor2eng_suggest", "eng2kor_suggest"]
+		},
+		"kor2eng_suggest": {
+			"type": "text",
+			"analyzer": "standard",
+			"search_analyzer": "kor2eng_analyzer"
+		},
+		"eng2kor_suggest": {
+			"type": "text",
+			"analyzer": "standard",
+			"search_analyzer": "eng2kor_analyzer"
+		}
+	}
+}
+
+### 샘플 데이터
+PUT http://localhost:9200/search_keyword/_doc/1
+Content-Type: application/json
+
+{
+	"name" : "삼성전자"
+
+}
+
+###
+PUT http://localhost:9200/search_keyword/_doc/2
+Content-Type: application/json
+
+{
+	"name" : "iphone"
+}
+
+### eng2kor
+POST http://localhost:9200/search_keyword/_search
+Content-Type: application/json
+
+{
+	"query": {
+		"match": {
+			"eng2kor_suggest": {
+				"query": "tkatjdwjswk"
+			}
+		}
+	}
+}
+
+### kor2eng
+POST http://localhost:9200/search_keyword/_search
+Content-Type: application/json
+
+{
+	"query": {
+		"match": {
+			"kor2eng_suggest": {
+				"query": "ㅑㅔㅗㅐㅜㄷ"
+			}
+		}
+	}
+}
+
+###

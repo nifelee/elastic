@@ -1,0 +1,117 @@
+# 7.3.3.4 한글 자모 검색 적용하기
+### 인덱스 생성
+PUT http://localhost:9200/ac_test4
+Content-Type: application/json
+
+{
+    "settings" : {
+        "index" : {
+            "number_of_shards" : 5,
+            "number_of_replicas" : 1
+        },
+		"analysis": {
+			"analyzer": {
+				"jamo_index_analyzer": {
+					"type": "custom",
+					"tokenizer": "keyword",
+					"filter": [
+						"javacafe_jamo_filter",
+						"lowercase",
+						"trim",
+						"edge_ngram_filter_front"
+					]
+				},
+				"jamo_search_analyzer": {
+					"type": "custom",
+					"tokenizer": "keyword",
+					"filter": [
+						"javacafe_jamo_filter",
+						"lowercase",
+						"trim"
+					]
+				}
+			},
+			"tokenizer" : {
+				"edge_ngram_tokenizer" : {
+					"type" : "edgeNGram",
+					"min_gram" : "1",
+					"max_gram" : "50",
+					"token_chars" : [
+						"letter",
+						"digit",
+						"punctuation",
+						"symbol"
+					]
+				}
+			},
+			"filter": {
+				"edge_ngram_filter_front" : {
+					"type" : "edgeNGram",
+					"min_gram" : "1",
+					"max_gram" : "50",
+					"side" : "front"
+				},
+				"javacafe_jamo_filter": {
+					"type": "javacafe_jamo"
+				}
+			}
+		}
+	}
+}
+
+### 매핑 추가
+PUT http://localhost:9200/ac_test4/_mapping/ac_test4
+Content-Type: application/json
+
+{
+	"properties": {
+		"item": {
+			"type": "keyword",
+			"boost": 30
+		},
+		"itemJamo": {
+			"type": "text",
+			"analyzer": "jamo_index_analyzer",
+			"search_analyzer": "jamo_search_analyzer",
+			"boost": 10
+		}
+	}
+}
+
+### Bulk Insert
+PUT http://localhost:9200/ac_test4/_mapping/ac_test4
+Content-Type: application/json
+
+{
+	"properties": {
+		"item": {
+			"type": "keyword",
+			"boost": 30
+		},
+		"itemJamo": {
+			"type": "text",
+			"analyzer": "jamo_index_analyzer",
+			"search_analyzer": "jamo_search_analyzer",
+			"boost": 10
+		}
+	}
+}
+
+### 자모 검색
+POST http://localhost:9200/ac_test4/_search
+Content-Type: application/json
+
+{
+	"query" : {
+		"bool" : {
+			"should" : [{
+				"term" : {
+					"itemJamo" : "ㅅㅣㄴㅎ"
+				}
+			}],
+			"minimum_should_match" : 1
+		}
+	}
+}
+
+###
