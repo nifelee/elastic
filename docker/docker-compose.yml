@@ -8,7 +8,7 @@ services:
       - 9300:9300
     volumes:
       - /Users/hklee/workspace/elastic/docker/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
-      - /Users/hklee/workspace/elastic/docker/config/analysis:/usr/share/elasticsearch/config/analysis
+      #- /Users/hklee/workspace/elastic/docker/config/analysis:/usr/share/elasticsearch/config/analysis
       - /Users/hklee/workspace/elastic/docker/config/dic:/usr/share/elasticsearch/config/dic
       - /Users/hklee/workspace/elastic/repo:/REPO
     environment:
@@ -16,7 +16,7 @@ services:
 
   kibana:
     container_name: kibana
-    image: kibana:6.7.1
+    image: kibana:6.4.3
     ports:
       - 5601:5601
     links:
